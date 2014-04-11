@@ -1,10 +1,21 @@
 
-int #test[100-1] = 2;
-
-int #currency[
- type {EUR, NOK, SEK, USD, YEN};
- = type (old, new) => $ * rate(old, new);
-
-];
-
-boolean #test2[test] = 2;
+Class#MainClass#{
+ 
+ name,
+ you[1],
+ 
+ var#[12 + 0 - you],
+ 
+ Function # sort ( List#array, Loop#system, rule)#{
+ 
+  for[system(array)](
+  (n, m),
+   rule(n, m)#{
+    var[ array( n ) ],
+    array(n)[ array(m) ],
+    array(m)[ var ],
+   }
+  )
+  
+ }
+}

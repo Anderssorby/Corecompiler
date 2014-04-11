@@ -2,60 +2,112 @@ package constructs;
 
 import java.util.Vector;
 
-public class Expression implements Construct {
+import compiler.SyntaxError;
 
-	private Vector<Element> mapping = new Vector<Element>();
-	private Vector<Object> values = new Vector<Object>();
-	private boolean ended = false;
+public abstract class Expression implements Construct {
 
-	protected enum Element {
+	protected Vector<Element> mapping = new Vector<Element>();
+	protected Vector<Object> values = new Vector<Object>();
+	protected boolean ended = false;
+
+	protected interface Element {
+		
+	};
+	protected enum ArithmeticElement implements Element {
 		PLUS, MINUS, MODULO, PARENTESIS_START, PARENTESIS_END, INTEGER, FLOAT, DOUBLE, MULTIPLY, DIVISION, END
 	};
+	public static class ArithmeticExpression extends Expression {
 
-	protected boolean isOperational(Element element, boolean includeMinus) {
-		switch (element) {
-		case MODULO: case MULTIPLY:
-		case DIVISION:
-			return true;
-		case MINUS:
-			return includeMinus;
-		default:
-			return false;
+		private ArithmeticExpression() {
+			
+		}
+		
+		public void end() {
+			ended = true;
+			mapping.add(ArithmeticElement.END);
+			values.add(null);
+		}
+		
+		public boolean hasEnded() {
+			return ended;
+		}
+
+		public void integer(Integer inte) {
+			// TODO Auto-generated method stub
+			mapping.add(ArithmeticElement.INTEGER);
+			values.add(inte);
+		}
+
+		public void multiply() {
+			// TODO Auto-generated method stub
+			mapping.add(ArithmeticElement.MULTIPLY);
+			values.add(null);
+		}
+
+		public void divide() {
+			mapping.add(ArithmeticElement.DIVISION);
+			values.add(null);
+		}
+
+		public void modulo() {
+			// TODO Auto-generated method stub
+			mapping.add(ArithmeticElement.MODULO);
+			values.add(null);
+		}
+		
+		public void startParenthesis() {
+			mapping.add(ArithmeticElement.PARENTESIS_START);
+			values.add(null);
+		}
+
+		public void endParenthesis() {
+			mapping.add(ArithmeticElement.PARENTESIS_END);
+			values.add(null);
+		}
+		
+		protected boolean isOperational(ArithmeticElement element, boolean includeMinus) {
+			switch (element) {
+			case MODULO: case MULTIPLY:
+			case DIVISION:
+				return true;
+			case MINUS:
+				return includeMinus;
+			default:
+				return false;
+			}
+		}
+
+		public void plus() throws SyntaxError {
+			ArithmeticElement previous = (ArithmeticElement) mapping.lastElement();
+			if (isOperational(previous, true)) {
+				throw new SyntaxError("Expected a nonoperational token");
+			}
+			mapping.add(ArithmeticElement.PLUS);
+			values.add(null);
+		}
+
+		public void minus() throws SyntaxError {
+			ArithmeticElement previous = (ArithmeticElement) mapping.lastElement();
+			if (isOperational(previous, true)) {
+				throw new SyntaxError("Expected a nonoperational token");
+			}
+			mapping.add(ArithmeticElement.MINUS);
+			values.add(null);
 		}
 	}
 
-	public void plus() {
-		Element previous = mapping.lastElement();
-		if (isOperational(previous, true)) {
-			throw new IllegalArgumentException();
-		}
-		mapping.add(Element.PLUS);
-		values.add(null);
+	public static ArithmeticExpression createArithmeticExpression() {
+		return new ArithmeticExpression();
 	}
 
-	public void minus() {
-		Element previous = mapping.lastElement();
-		if (isOperational(previous, true)) {
-			throw new IllegalArgumentException();
-		}
-		mapping.add(Element.MINUS);
-		values.add(null);
-	}
 
 	public void end() {
 		ended = true;
-		mapping.add(Element.END);
-		values.add(null);
 	}
 	
 	public boolean hasEnded() {
 		return ended;
 	}
 
-	public void integer(Integer inte) {
-		// TODO Auto-generated method stub
-		mapping.add(Element.INTEGER);
-		values.add(inte);
-	}
 	
 }
