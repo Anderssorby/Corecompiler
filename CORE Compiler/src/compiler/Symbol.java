@@ -4,6 +4,7 @@ public class Symbol {
 
 	private Token token;
 	private String value;
+	private int line;
 
 	public Symbol(Token token) {
 		this(token, null);
@@ -20,6 +21,14 @@ public class Symbol {
 
 	public String getValue() {
 		return value;
+	}
+	
+	public void setLine(int line) {
+		this.line = line;
+	}
+
+	public int line() {
+		return line;
 	}
 
 }

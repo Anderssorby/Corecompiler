@@ -6,8 +6,8 @@ public class ArrayConstruct extends Definition {
 
 	private Vector<Definition> elements = new Vector<Definition>();
 
-	public ArrayConstruct(ConstrainType type, Scope scope) {
-		super(type, scope);
+	public ArrayConstruct(ConstrainType type) {
+		super(type);
 	}
 
 	public void add(Definition definition) {

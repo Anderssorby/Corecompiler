@@ -1,7 +1,7 @@
 
 Class#MainClass#{
  
- name,
+ name["Hello I'm Anders"],
  you[1],
  
  var#[12 + 0 - you],
@@ -13,7 +13,7 @@ Class#MainClass#{
    rule(n, m)#{
     var[ array( n ) ],
     array(n)[ array(m) ],
-    array(m)[ var ],
+    array(m)[ var ]
    }
   )
   

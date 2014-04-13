@@ -1,6 +1,5 @@
 package compiler;
 
-import java.util.Scanner;
 import java.util.Vector;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -10,7 +9,7 @@ public class Lexer {
 
 	private Token[] tokens;
 
-	private String[] ignore = { "\n", " ", "\t", "\r", "\r\n" };
+	private String[] ignore = {"\r\n", "\n", " ", "\t", "\r"};
 
 	private Vector<Symbol> table;
 
@@ -24,31 +23,39 @@ public class Lexer {
 		table = new Vector<Symbol>();
 		reset();
 		int pos = 0;
-		Scanner scanner = new Scanner(text);
+		int line = 1;
 		main: while (pos < text.length()) {
-			for (String ign:ignore) {
+			for (String ign : ignore) {
 				Pattern p = Pattern.compile(Pattern.quote(ign));
 				Matcher matcher = p.matcher(text.substring(pos));
 				if (matcher.lookingAt()) {
+					if (isNewline(ign)) line++;
 					pos += matcher.end();
 					continue main;
 				}
 			}
+			int mlen = 0;
+			Symbol symbol = null;
 			for (Token token : tokens) {
 				MatchResult m = token.match(text.substring(pos));
 				if (m != null) {
 					String value = m.group();
-					Symbol symbol = new Symbol(token, value);
-					table.add(symbol);
-					pos += m.end();
-					continue main;
+					if (m.end() > mlen) {
+						mlen = m.end();
+						symbol = new Symbol(token, value);
+						symbol.setLine(line);
+					}
 				} else {
 					continue;
 				}
 			}
-			// weird symbol
-			pos++;
+			pos += mlen;
+			table.add(symbol);
 		}
+	}
+
+	public boolean isNewline(String ign) {
+		return ign.equals("\n")||ign.equals("\r")||ign.equals("\r\n");
 	}
 
 	public Symbol nextToken() {
@@ -63,5 +70,12 @@ public class Lexer {
 
 	public void reset() {
 		index = 0;
+	}
+
+	/**
+	 * goes back one step
+	 */
+	public void back() {
+		index--;
 	}
 }

@@ -4,22 +4,16 @@ import java.util.Vector;
 
 public class Definition implements Constraint, Construct {
 	
-	public class Scope {
-		private Constraint owner;
-	}
-	
 	public enum ConstrainType {
 		NAMED, EXPRESSIVE, LIST, FORM
 	}
 
-	private Scope scope;
 	private final ConstrainType type;
 	private Object value;
 	private Vector<Definition> constraints = new Vector<Definition>();
 	
-	public Definition(ConstrainType type, Scope scope) {
+	public Definition(ConstrainType type) {
 		this.type = type;
-		this.scope = scope;
 	}
 
 	public void setValue(Object value) {
@@ -40,6 +34,10 @@ public class Definition implements Constraint, Construct {
 			sb.append("}");
 		}
 		return sb.toString();
+	}
+
+	public ConstrainType getType() {
+		return type;
 	}
 
 }

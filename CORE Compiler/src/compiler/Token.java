@@ -38,7 +38,7 @@ public enum Token {
 					esc = false;
 				} else {
 					if (c==exmark) {
-						eh = i;
+						eh = i+1;
 						break;
 					} else if (c=='\\') {
 						esc = true;
