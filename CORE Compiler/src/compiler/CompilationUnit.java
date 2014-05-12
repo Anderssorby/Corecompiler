@@ -1,9 +1,12 @@
 package compiler;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
 
+import constructs.Construct;
 import constructs.Definition;
 import constructs.Definition.ConstrainType;
 import constructs.Expression;
@@ -12,38 +15,39 @@ import constructs.ListConstruct;
 import constructs.Scope;
 
 public class CompilationUnit {
-	
-	private DefinitionReader definition;
+
+	private DefinitionReader definitionReader;
 	private ExpressionReader expressionReader;
 	private Compiler compiler;
-	private String fileName;
+	private File file;
 	private String name;
-	
-	public CompilationUnit(Compiler compiler, String name) {
+	private String text;
+
+	public CompilationUnit(Compiler compiler, File file) {
 		this.compiler = compiler;
-		this.fileName = name;
-		this.name = name.replaceFirst("\\.[A-Za-z]+$", "");
-		definition = new DefinitionReader(this);
+		this.file = file;
+		this.name = file.getName().replaceFirst("\\.[A-Za-z]+$", "");
+		definitionReader = new DefinitionReader(this);
 		expressionReader = new ExpressionReader(this);
 	}
-	
-	public void parse(String text, Lexer lexer) {
-		System.err.println("Scanning...");
+
+	public void parse(Lexer lexer) {
+		System.out.println("Scanning...");
 		lexer.scann(text);
 		while (lexer.hasNext())
 			System.out.println(lexer.nextToken().getToken().name() + ", ");
 		lexer.reset();
-		System.err.println("Parsing...");
-		Vector<Definition> top = new Vector<Definition>();
+		System.out.println("Parsing...");
+		Vector<Construct> top = new Vector<Construct>();
 		try {
 			while (lexer.hasNext()) {
-				Symbol symbol = lexer.nextToken();
-				Definition c = definition.read(symbol, lexer);
+				Construct c = readNext(lexer);
 				top.add(c);
-				if (c instanceof ImportRule) {
-					ImportRule rule = (ImportRule) c;
-					compiler.createCompilationUnit(new File(rule.getTargetPathName()));
-					
+				if (c instanceof MetaConstraint) {
+					MetaConstraint rule = (MetaConstraint) c;
+					String pathname = rule.getFormative().get(0).getValue();
+					compiler.createCompilationUnit(new File(pathname));
+
 				}
 			}
 		} catch (SyntaxError e) {
@@ -51,7 +55,19 @@ public class CompilationUnit {
 		}
 		System.out.println(top);
 	}
-	
+
+	public Construct readNext(Lexer lexer) throws SyntaxError {
+		Symbol symbol = lexer.nextToken();
+		Definition definition = definitionReader.read(symbol, lexer);
+		if (definition == null) {
+			Expression ex = expressionReader.read(symbol, lexer);
+			definition = new Definition(ConstrainType.EXPRESSIVE);
+			definition.setValue(ex);
+			return ex;
+		}
+		return definition;
+	}
+
 	public class DefinitionReader extends Reader<Definition> {
 
 		private HashMap<String, Definition> definitions = new HashMap<String, Definition>();
@@ -59,25 +75,33 @@ public class CompilationUnit {
 		private Vector<Definition> last = new Vector<Definition>();
 
 		private Vector<Scope> scopes = new Vector<Scope>();
-	
+
 		public DefinitionReader(CompilationUnit unit) {
 			super(unit);
 			scopes.add(new Scope(null, null));
 		}
 
 		@Override
-		public Definition read(Symbol symbol, Lexer lexer) throws SyntaxError {
+		public Definition read(Symbol symbol, Lexer lexer) {
 			switch (symbol.getToken()) {
 			case SQUARE_BRACES_LEFT: {
 				Scope current = scopes.lastElement();
 				Definition definition = new Definition(ConstrainType.EXPRESSIVE);
+				// TODO generalize evaluatives and formatives
+				Definition las = last.lastElement();
+				if (las.getType() == ConstrainType.NAMED) {
+					las.setEvaluative(definition);
+				}
 				current.register(definition);
-				definition.setValue(unit.expressionReader.read(lexer.nextToken(),
-						lexer));
 				last.add(definition);
-				return read(lexer.nextToken(), lexer);
+				definition.setValue(readNext(lexer));
+				readNext(lexer);
+				removeTail(last, definition);
+				return definition;
 			}
 			case SQUARE_BRACES_RIGHT: {
+
+				// TODO fix for recursion
 				Definition definition = last.lastElement();
 				if (definition.getType() != ConstrainType.EXPRESSIVE) {
 					throw new SyntaxError(symbol, unit);
@@ -87,11 +111,14 @@ public class CompilationUnit {
 			case CONSTRAIN: {
 				Definition hold = last.lastElement();
 				Scope current = scopes.lastElement();
-				Scope next = new Scope(hold, current);
-				scopes.add(next);
-				hold.constrain(read(lexer.nextToken(), lexer));
+				Scope scope = new Scope(hold, current);
+				scopes.add(scope);
+				Definition next = (Definition) readNext(lexer);
+				if (next == null) {
+					throw new SyntaxError(symbol, unit);
+				}
+				hold.constrain(next);
 				removeTail(scopes, current);
-				removeTail(last, hold);
 				return hold;
 			}
 			case NAME: {
@@ -101,6 +128,8 @@ public class CompilationUnit {
 				current.register(definition);
 				definitions.put(symbol.getValue(), definition);
 				last.add(definition);
+				readNext(lexer);
+				removeTail(last, definition);
 				return definition;
 			}
 			case CURLY_BRACES_LEFT: {
@@ -108,17 +137,22 @@ public class CompilationUnit {
 				ListConstruct list = new ListConstruct();
 				last.add(list);
 				current.register(list);
-				list.add(read(lexer.nextToken(), lexer));
-				removeTail(scopes, current);
-				removeTail(last, list);
+				while (lexer.hasNext()) {
+					Definition next = (Definition) readNext(lexer);
+					removeTail(last, list);
+					if (next == null)
+						break;
+					list.add(next);
+				}
+				readNext(lexer);
 				return list;
 			}
 			case COMMA: {
-				Scope current = scopes.lastElement();
-				Definition definition = read(lexer.nextToken(), lexer);
-				removeTail(scopes, current);
-				removeTail(last, definition);
-				return definition;
+				// Scope current = scopes.lastElement();
+				// Definition definition = readNext(lexer);
+				// removeTail(scopes, current);
+				// removeTail(last, definition);
+				return null;
 			}
 			case CURLY_BRACES_RIGHT: {
 				// find back
@@ -133,16 +167,26 @@ public class CompilationUnit {
 					throw new SyntaxError(symbol, unit);
 				}
 				removeTail(last, list);
-				return list;
+				return null;
 			}
 			case PARENTHESIS_LEFT: {
 				Scope current = scopes.lastElement();
 				FormConstruct list = new FormConstruct();
+				// TODO generalize evaluatives and formatives
+				Definition las = last.lastElement();
+				if (las.getType() == ConstrainType.NAMED) {
+					las.setFormative(list);
+				}
 				last.add(list);
 				current.register(list);
-				list.add(read(lexer.nextToken(), lexer));
-				removeTail(scopes, current);
-				removeTail(last, list);
+				while (lexer.hasNext()) {
+					Definition next = (Definition) readNext(lexer);
+					removeTail(last, list);
+					if (next == null)
+						break;
+					list.add(next);
+				}
+				readNext(lexer);
 				return list;
 			}
 			case PARENTHESIS_RIGHT: {
@@ -157,10 +201,16 @@ public class CompilationUnit {
 					throw new SyntaxError(symbol, unit);
 				}
 				removeTail(last, list);
-				return list;
+				return null;
+			}
+			case META_CONSTRAINT: {
+				MetaConstraint constraint = new MetaConstraint(
+						symbol.getValue());
+				readNext(lexer);
+				return constraint;
 			}
 			default: {
-				throw new SyntaxError(symbol, unit);
+				return null;
 			}
 			}
 		}
@@ -177,64 +227,66 @@ public class CompilationUnit {
 		}
 
 		@Override
-		public Expression read(Symbol symbol, Lexer lexer) throws SyntaxError {
+		public Expression read(Symbol symbol, Lexer lexer) {
 			switch (symbol.getToken()) {
 			case STRING_LITTERAL: {
 				loadExpression();
 				expression.string(symbol.getValue());
-				return read(lexer.nextToken(), lexer);
+				return expression;
 			}
 			case NAME: {
 				loadExpression();
-				expression.name(symbol.getValue());
-				return read(lexer.nextToken(), lexer);
+				expression.constraint(definitionReader.read(symbol, lexer));
+				return expression;
 			}
 			case NUMBER: {
 				loadExpression();
 				Integer inte = Integer.parseInt(symbol.getValue());
 				expression.integer(inte);
-				return read(lexer.nextToken(), lexer);
+				return expression;
 			}
 			case PLUS: {
 				loadExpression();
 				expression.plus();
-				return read(lexer.nextToken(), lexer);
+				return expression;
 			}
 			case MINUS: {
 				loadExpression();
 				expression.minus();
-				return read(lexer.nextToken(), lexer);
+				return expression;
 			}
 			case MULTIPLY: {
 				loadExpression();
 				expression.multiply();
-				return read(lexer.nextToken(), lexer);
+				return expression;
 			}
 			case DIVIDE: {
 				loadExpression();
 				expression.divide();
-				return read(lexer.nextToken(), lexer);
+				return expression;
 			}
 			case PERCENT: {
 				loadExpression();
 				expression.modulo();
-				return read(lexer.nextToken(), lexer);
+				return expression;
 			}
 			case PARENTHESIS_LEFT: {
 				loadExpression();
 				expression.startParenthesis();
-				return read(lexer.nextToken(), lexer);
+				return expression;
 			}
 			case PARENTHESIS_RIGHT: {
 				loadExpression();
 				expression.endParenthesis();
-				return read(lexer.nextToken(), lexer);
+				return expression;
 			}
 			default: {
 				lexer.back();
 				// End of parsing
 				expression.end();
-				return expression;
+				Expression ex = expression;
+				expression = null;
+				return ex;
 			}
 			}
 		}
@@ -257,10 +309,24 @@ public class CompilationUnit {
 	}
 
 	public String getFileName() {
-		return fileName;
+		return file.getName();
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public void loadFile() {
+		try {
+			FileReader fr = new FileReader(file);
+			char[] buff = new char[(int) file.length()];
+			System.out.println("Reading file...");
+			fr.read(buff);
+			fr.close();
+			text = new String(buff);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -20,8 +20,7 @@ public class Lexer {
 	}
 
 	public void scann(String text) {
-		table = new Vector<Symbol>();
-		reset();
+		clean();
 		int pos = 0;
 		int line = 1;
 		main: while (pos < text.length()) {
@@ -68,6 +67,9 @@ public class Lexer {
 		return index < table.size();
 	}
 
+	/**
+	 * Winds back the pointer. 
+	 */
 	public void reset() {
 		index = 0;
 	}
@@ -77,5 +79,13 @@ public class Lexer {
 	 */
 	public void back() {
 		index--;
+	}
+
+	/**
+	 * creates a fresh lexer
+	 */
+	protected void clean() {
+		table = new Vector<Symbol>();
+		reset();
 	}
 }

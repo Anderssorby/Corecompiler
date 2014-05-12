@@ -1,8 +1,6 @@
 package compiler;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Vector;
 
 public class Compiler {
@@ -13,7 +11,6 @@ public class Compiler {
 	
 	public Compiler() {
 		lexer = new Lexer(Token.values());
-		
 	}
 
 	public static void main(String[] args) {
@@ -23,18 +20,9 @@ public class Compiler {
 	}
 
 	public CompilationUnit createCompilationUnit(File file) {
-		CompilationUnit unit = new CompilationUnit(this, file.getName());
-		try {
-			FileReader fr = new FileReader(file);
-			char[] buff = new char[(int) file.length()];
-			System.err.println("Reading file...");
-			fr.read(buff);
-			fr.close();
-			String text = new String(buff);
-			unit.parse(text, lexer);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		CompilationUnit unit = new CompilationUnit(this, file);
+		unit.loadFile();
+		unit.parse(lexer);
 		units.add(unit);
 		return unit;
 	}

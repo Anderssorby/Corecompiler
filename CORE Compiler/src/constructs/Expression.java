@@ -105,7 +105,7 @@ public class Expression implements Construct {
 		return ended;
 	}
 
-	public void name(String value) {
+	public void constraint(Constraint value) {
 		mapping.add(null);
 		values.add(value);
 	}

@@ -23,8 +23,12 @@ public enum Token {
 			int eh = 0;
 			final CharBuffer result = CharBuffer.allocate(l);
 			boolean esc = false;
+			int line = 0;
 			for (int i = 0; i < l; i++) {
 				char c = input.charAt(i);
+				if (c=='\n') {
+					line++;
+				}
 				if (i==0) {
 					if (c=='"'||c=='\'') {
 						exmark = c;
@@ -46,7 +50,8 @@ public enum Token {
 				}
 			}
 			final int end = eh;
-			return new MatchResult() {
+			final int fline = line;
+			return new TokenMatchResult() {
 
 				@Override
 				public int start() {
@@ -82,8 +87,19 @@ public enum Token {
 				public int groupCount() {
 					return 0;
 				}
+
+				@Override
+				public int lineCount() {
+					return fline;
+				}
 				
 			};
+		}
+
+		@Override
+		public int getMinimalLength() {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 		
 	}),
@@ -97,6 +113,7 @@ public enum Token {
 	
 	private Pattern pattern;
 	private MatchingEngine engine;
+	private int minimalLength;
 	
 	Token(String regex, boolean isRegex) {
 		this.engine = new DefaultMatcher();
@@ -104,6 +121,7 @@ public enum Token {
 			this.pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 		} else {
 			this.pattern = Pattern.compile(Pattern.quote(regex), Pattern.CASE_INSENSITIVE);
+			this.minimalLength = regex.length();
 		}
 	}
 	
@@ -117,9 +135,12 @@ public enum Token {
 	
 	interface MatchingEngine {
 		public MatchResult match(String input);
+		
+		public int getMinimalLength();
 	}
 	
 	public class DefaultMatcher implements MatchingEngine {
+
 		private DefaultMatcher() {
 			
 		}
@@ -134,6 +155,11 @@ public enum Token {
 			else {
 				return null;
 			}
+		}
+
+		@Override
+		public int getMinimalLength() {
+			return minimalLength;
 		}
 	}
 	
