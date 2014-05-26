@@ -2,11 +2,11 @@ package compiler;
 
 import constructs.Construct;
 
-public interface TokenPattern {
+public interface TokenPattern extends PatternComponent {
 	
 	public static int TOKEN_APROVED = 0x0;
 	
-	public static int TOKEN_ILLEAGAL = 0x1;
+	public static int TOKEN_ILLEGAL = 0x1;
 	
 	public static int PATTERN_ENDED = 0x2;
 	

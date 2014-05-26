@@ -6,7 +6,7 @@ import java.util.Vector;
 public class Compiler {
 
 	private Lexer lexer;
-	
+		
 	private Vector<CompilationUnit> units = new Vector<CompilationUnit>();
 	
 	public Compiler() {

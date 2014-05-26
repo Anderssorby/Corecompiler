@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public enum Token {
+public enum Token implements PatternComponent {
 	NAME("[_a-z$][_a-z0-9$]*", true), CONSTRAIN("#"),
 	CURLY_BRACES_LEFT("{"), CURLY_BRACES_RIGHT("}"),
 	PARENTHESIS_LEFT("("), PARENTHESIS_RIGHT(")"),

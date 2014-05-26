@@ -2,11 +2,11 @@ package compiler;
 
 import constructs.Construct;
 
-public interface ConstructFactory {
+public interface ConstructFactory<E extends Construct> {
 
-	public Construct getProduct();
+	public E getProduct();
 
-	public void addToAssembly(Symbol symbol);
+	public E addToAssembly(Symbol symbol);
 
 	public boolean hasEnded();
 

@@ -2,14 +2,30 @@ package compiler;
 
 import constructs.Construct;
 
-public class SimplePattern implements TokenPattern {
-	public Token[] tokenOrder;
-	
+public enum SimplePattern implements TokenPattern {
+	NAMED(new Token[] { Token.NAME }, new DefinitionFactory()),
+
+	EXPRESSIVE(new Token[] { Token.SQUARE_BRACES_LEFT,
+			Token.SQUARE_BRACES_RIGHT }, new DefinitionFactory()),
+
+	STANDARD_LIST(new PatternComponent[] {}, new ListFactory()),
+
+	LIST(new PatternComponent[] { Token.CURLY_BRACES_LEFT, STANDARD_LIST,
+			Token.CURLY_BRACES_RIGHT }, new ListFactory()),
+
+	FORM(new PatternComponent[] { Token.PARENTHESIS_LEFT, STANDARD_LIST, Token.PARENTHESIS_RIGHT },
+			new FormFactory()),
+
+	META(new PatternComponent[] { Token.META_CONSTRAINT }, new DefinitionFactory()),
+
+	EXPRESSION(new Token[] { Token.PLUS }, new ExpressionFactory());
+	public PatternComponent[] tokenOrder;
+
 	public int pointer = 0;
 
-	private ConstructFactory factory;
+	private ConstructFactory<?> factory;
 
-	public SimplePattern(Token[] tokens, ConstructFactory factory) {
+	SimplePattern(PatternComponent[] tokens, ConstructFactory<?> factory) {
 		this.tokenOrder = tokens;
 		this.factory = factory;
 	}
@@ -22,7 +38,7 @@ public class SimplePattern implements TokenPattern {
 				return PATTERN_ENDED;
 			return TOKEN_APROVED;
 		}
-		return TOKEN_ILLEAGAL;
+		return TOKEN_ILLEGAL;
 	}
 
 	@Override
