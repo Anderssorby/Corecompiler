@@ -1,6 +1,8 @@
-package compiler;
+package com.softeno.java.compiler.factories;
 
-import constructs.Expression;
+import com.softeno.java.compiler.PatternComponent;
+import com.softeno.java.compiler.Symbol;
+import com.softeno.java.constructs.Expression;
 
 public class ExpressionFactory implements ConstructFactory<Expression> {
 
@@ -14,62 +16,72 @@ public class ExpressionFactory implements ConstructFactory<Expression> {
 	@Override
 	public Expression getProduct() {
 		// TODO Auto-generated method stub
-		return null;
+		return expression;
 	}
 
 	@Override
-	public Expression addToAssembly(Symbol symbol) {
+	public boolean addToAssembly(Symbol symbol) {
 		switch (symbol.getToken()) {
 		case STRING_LITTERAL: {
 			loadExpression();
 			expression.string(symbol.getValue());
-			return expression;
+//			return expression;
+			return true;
 		}
 		case NAME: {
 			loadExpression();
 //			expression.constraint(definitionReader.read(symbol, lexer));
-			return expression;
+//			return expression;
+			return true;
 		}
 		case NUMBER: {
 			loadExpression();
 			Integer inte = Integer.parseInt(symbol.getValue());
 			expression.integer(inte);
-			return expression;
+//			return expression;
+			return true;
 		}
 		case PLUS: {
 			loadExpression();
 			expression.plus();
-			return expression;
+//			return expression;
+			return true;
 		}
 		case MINUS: {
 			loadExpression();
 			expression.minus();
-			return expression;
+//			return expression;
+			return true;
 		}
 		case MULTIPLY: {
 			loadExpression();
 			expression.multiply();
-			return expression;
+//			return expression;
+			return true;
 		}
 		case DIVIDE: {
 			loadExpression();
 			expression.divide();
-			return expression;
+//			return expression;
+			return true;
 		}
 		case PERCENT: {
 			loadExpression();
 			expression.modulo();
-			return expression;
+//			return expression;
+			return true;
 		}
 		case PARENTHESIS_LEFT: {
 			loadExpression();
 			expression.startParenthesis();
-			return expression;
+//			return expression;
+			return true;
 		}
 		case PARENTHESIS_RIGHT: {
 			loadExpression();
 			expression.endParenthesis();
-			return expression;
+//			return expression;
+			return true;
 		}
 		default: {
 //			lexer.back();
@@ -77,7 +89,8 @@ public class ExpressionFactory implements ConstructFactory<Expression> {
 			expression.end();
 			Expression ex = expression;
 			expression = null;
-			return ex;
+//			return ex;
+			return false;
 		}
 		}
 	}
@@ -93,6 +106,12 @@ public class ExpressionFactory implements ConstructFactory<Expression> {
 	public boolean hasEnded() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void setPattern(PatternComponent[] pattern) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

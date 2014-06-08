@@ -1,19 +1,17 @@
-package compiler;
+package com.softeno.java.compiler;
+
 import java.nio.CharBuffer;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public enum Token implements PatternComponent {
-	NAME("[_a-z$][_a-z0-9$]*", true), CONSTRAIN("#"),
-	CURLY_BRACES_LEFT("{"), CURLY_BRACES_RIGHT("}"),
-	PARENTHESIS_LEFT("("), PARENTHESIS_RIGHT(")"),
-	SQUARE_BRACES_LEFT("["), SQUARE_BRACES_RIGHT("]"),
-	DOT("."), PLUS("+"), MINUS("-"),
-	COMMA(","), NUMBER("[0-9]+(\\.[0-9]+)?", true), MULTIPLY("*"),
-	DIVIDE("/"), PERCENT("%"), META_CONSTRAINT("@[_a-z$][_a-z0-9$]*", true),
-	
+	NAME("[_a-z$][_a-z0-9$]*", true), CONSTRAIN("#"), CURLY_BRACES_LEFT("{"), CURLY_BRACES_RIGHT(
+			"}"), PARENTHESIS_LEFT("("), PARENTHESIS_RIGHT(")"), SQUARE_BRACES_LEFT(
+			"["), SQUARE_BRACES_RIGHT("]"), DOT("."), PLUS("+"), MINUS("-"), COMMA(
+			","), NUMBER("[0-9]+(\\.[0-9]+)?", true), MULTIPLY("*"), DIVIDE("/"), PERCENT(
+			"%"), META_CONSTRAINT("@[_a-z$][_a-z0-9$]*", true),
+
 	STRING_LITTERAL(new MatchingEngine() {
 
 		@Override
@@ -26,25 +24,25 @@ public enum Token implements PatternComponent {
 			int line = 0;
 			for (int i = 0; i < l; i++) {
 				char c = input.charAt(i);
-				if (c=='\n') {
+				if (c == '\n') {
 					line++;
 				}
-				if (i==0) {
-					if (c=='"'||c=='\'') {
+				if (i == 0) {
+					if (c == '"' || c == '\'') {
 						exmark = c;
 						continue;
 					} else {
 						return null;
 					}
 				}
-				if ((c != exmark && c != '\\' )|| esc) {
+				if ((c != exmark && c != '\\') || esc) {
 					result.append(c);
 					esc = false;
 				} else {
-					if (c==exmark) {
-						eh = i+1;
+					if (c == exmark) {
+						eh = i + 1;
 						break;
-					} else if (c=='\\') {
+					} else if (c == '\\') {
 						esc = true;
 					}
 				}
@@ -92,67 +90,67 @@ public enum Token implements PatternComponent {
 				public int lineCount() {
 					return fline;
 				}
-				
+
 			};
 		}
 
 		@Override
 		public int getMinimalLength() {
-			// TODO Auto-generated method stub
 			return 0;
 		}
-		
+
 	}),
 	/*
-	 * Boolean operators 
+	 * Boolean operators
 	 */
-	
-	 GRATER_THAN(">"), LESS_THAN("<"), BOOLEAN_AND("&&"), BOOLEAN_OR("||"), NOT("!")
-	 
+
+	GRATER_THAN(">"), LESS_THAN("<"), BOOLEAN_AND("&&"), BOOLEAN_OR("||"), NOT(
+			"!")
+
 	;
-	
+
 	private Pattern pattern;
 	private MatchingEngine engine;
 	private int minimalLength;
-	
+
 	Token(String regex, boolean isRegex) {
 		this.engine = new DefaultMatcher();
 		if (isRegex) {
-			this.pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+			this.pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE
+					| Pattern.DOTALL);
 		} else {
-			this.pattern = Pattern.compile(Pattern.quote(regex), Pattern.CASE_INSENSITIVE);
+			this.pattern = Pattern.compile(Pattern.quote(regex),
+					Pattern.CASE_INSENSITIVE);
 			this.minimalLength = regex.length();
 		}
 	}
-	
+
 	Token(String regex) {
 		this(regex, false);
 	}
-	
+
 	Token(MatchingEngine m) {
 		this.engine = m;
 	}
-	
+
 	interface MatchingEngine {
 		public MatchResult match(String input);
-		
+
 		public int getMinimalLength();
 	}
-	
+
 	public class DefaultMatcher implements MatchingEngine {
 
 		private DefaultMatcher() {
-			
+
 		}
-		
+
 		@Override
 		public MatchResult match(String input) {
 			Matcher matcher = pattern.matcher(input);
-			if (matcher.lookingAt())
-			{
+			if (matcher.lookingAt()) {
 				return matcher.toMatchResult();
-			}
-			else {
+			} else {
 				return null;
 			}
 		}
@@ -162,13 +160,17 @@ public enum Token implements PatternComponent {
 			return minimalLength;
 		}
 	}
-	
+
 	public MatchResult match(String input) {
 		return engine.match(input);
 	}
-	
-	public Pattern getPattern()
-	{
+
+	public Pattern getPattern() {
 		return pattern;
+	}
+
+	@Override
+	public boolean recognise(Symbol symbol, int i) {
+		return this.equals(symbol);
 	}
 }
