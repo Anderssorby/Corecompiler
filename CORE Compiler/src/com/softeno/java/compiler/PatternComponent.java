@@ -12,7 +12,7 @@ public interface PatternComponent {
 	 * @param point
 	 * @return 
 	 */
-	public boolean recognise(Symbol symbol, int point);
+	public int recognise(Symbol symbol, int point);
 	
 	
 }

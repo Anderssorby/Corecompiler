@@ -4,6 +4,8 @@ import java.nio.CharBuffer;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static com.softeno.java.compiler.TokenPattern.TOKEN_APROVED;
+import static com.softeno.java.compiler.TokenPattern.TOKEN_ILLEGAL;
 
 public enum Token implements PatternComponent {
 	NAME("[_a-z$][_a-z0-9$]*", true), CONSTRAIN("#"), CURLY_BRACES_LEFT("{"), CURLY_BRACES_RIGHT(
@@ -170,7 +172,7 @@ public enum Token implements PatternComponent {
 	}
 
 	@Override
-	public boolean recognise(Symbol symbol, int i) {
-		return this.equals(symbol);
+	public int recognise(Symbol symbol, int i) {
+		return this.equals(symbol) ? TOKEN_APROVED : TOKEN_ILLEGAL;
 	}
 }

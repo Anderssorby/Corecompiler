@@ -1,15 +1,12 @@
 package com.softeno.java.compiler.factories;
 
-import com.softeno.java.compiler.LanguagePattern;
 import com.softeno.java.compiler.MetaConstraint;
 import com.softeno.java.compiler.PatternComponent;
 import com.softeno.java.compiler.Symbol;
-import com.softeno.java.compiler.SyntaxError;
+import com.softeno.java.constructs.Construct;
 import com.softeno.java.constructs.Definition;
-import com.softeno.java.constructs.FormConstruct;
-import com.softeno.java.constructs.ListConstruct;
-import com.softeno.java.constructs.Scope;
 import com.softeno.java.constructs.Definition.ConstrainType;
+import com.softeno.java.constructs.FormConstruct;
 
 public class DefinitionFactory implements ConstructFactory<Definition> {
 
@@ -155,6 +152,16 @@ public class DefinitionFactory implements ConstructFactory<Definition> {
 	public void setPattern(PatternComponent[] pattern) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void addToAssembly(Construct construct) {
+		if (construct instanceof FormConstruct){
+			product.setFormative((FormConstruct) construct);
+		} else if (construct instanceof Definition) {
+			product.setEvaluative((Definition) construct);
+		}
+		
 	}
 
 }

@@ -2,6 +2,7 @@ package com.softeno.java.compiler.factories;
 
 import com.softeno.java.compiler.PatternComponent;
 import com.softeno.java.compiler.Symbol;
+import com.softeno.java.constructs.Construct;
 import com.softeno.java.constructs.Expression;
 
 public class ExpressionFactory implements ConstructFactory<Expression> {
@@ -110,6 +111,12 @@ public class ExpressionFactory implements ConstructFactory<Expression> {
 
 	@Override
 	public void setPattern(PatternComponent[] pattern) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addToAssembly(Construct construct) {
 		// TODO Auto-generated method stub
 		
 	}

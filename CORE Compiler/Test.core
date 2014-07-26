@@ -1,12 +1,12 @@
 
-Class#MainClass#{
+Class#*MainClass{
  
- name["Hello I'm Anders"],
- you[1],
+ *name["Hello I'm Anders"],
+ *you[1],
  
  var#[12 + 0 - you],
  
- Function # sort ( List#array, Loop#system, rule)#{
+ Function # *sort ( List#array, Loop#system, rule)#{
  
   for[system(array)](
   (n, m),

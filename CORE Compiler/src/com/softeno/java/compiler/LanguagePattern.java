@@ -30,7 +30,7 @@ public class LanguagePattern extends TokenPattern {
 		}
 
 		@Override
-		public boolean recognise(Symbol token, int point) {
+		public int recognise(Symbol token, int point) {
 			return getReference().recognise(token, point);
 		}
 	}
@@ -73,9 +73,9 @@ public class LanguagePattern extends TokenPattern {
 		values.put(
 				"CONSTRAINT",
 				new LanguagePattern(DefinitionFactory.class, TokenPattern.or(
-						ref("FORM"), ref("LIST"), ref("EXPRESSIVE"),
-						ref("NAMED"), ref("META")), TokenPattern.and(
-						ref("CONSTRAINT"), Token.CONSTRAIN, ref("CONSTRAINT"))));
+						ref("NAMED"), ref("META"), ref("FORM"), ref("LIST"),
+						ref("EXPRESSIVE")), TokenPattern.and(ref("CONSTRAINT"),
+						Token.CONSTRAIN, ref("CONSTRAINT"))));
 
 		values.put(
 				"STANDARD_LIST",
@@ -88,7 +88,7 @@ public class LanguagePattern extends TokenPattern {
 	private Class<? extends ConstructFactory<?>> factoryClass;
 	private ConstructFactory<?> factory;
 
-	private TokenPattern combinedPattern;
+	private PatternOR combinedPattern;
 
 	/**
 	 * 
@@ -120,13 +120,15 @@ public class LanguagePattern extends TokenPattern {
 	 * @return
 	 */
 	public int tryNextToken(Symbol symbol) {
-		if (combinedPattern.recognise(symbol, 0)) {
+		int code = combinedPattern.recognise(symbol, 0);
+		if (code == PATTERN_ENDED || code == TOKEN_APROVED) {
 			PatternComponent lookup = combinedPattern.getLookUp();
-			if (lookup instanceof LanguagePattern) {
+			if (code == PATTERN_ENDED && lookup instanceof LanguagePattern) {
 				LanguagePattern lp = (LanguagePattern) lookup;
-				
+				factory.addToAssembly(lp.fetchProduct());
+			} else {
+				factory.addToAssembly(symbol);
 			}
-			factory.addToAssembly(symbol);
 			if (factory.hasEnded())
 				return PATTERN_ENDED;
 			return TOKEN_APROVED;
@@ -148,16 +150,9 @@ public class LanguagePattern extends TokenPattern {
 	}
 
 	@Override
-	public boolean recognise(Symbol symbol, int point) {
-		switch (tryNextToken(symbol)) {
-		case PATTERN_ENDED:
-			return true;
-		case TOKEN_APROVED:
-			return true;
-		case TOKEN_ILLEGAL:
-			break;
-		}
-		return false;
+	public int recognise(Symbol symbol, int point) {
+		return tryNextToken(symbol);
+
 	}
 
 	public static LanguagePattern get(String string) {

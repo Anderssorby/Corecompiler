@@ -14,4 +14,6 @@ public interface ConstructFactory<E extends Construct> {
 
 	public boolean hasEnded();
 
+	public void addToAssembly(Construct construct);
+
 }

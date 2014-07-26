@@ -2,12 +2,12 @@ package com.softeno.java.compiler;
 
 public abstract class TokenPattern implements PatternComponent {
 
-	public static final int TOKEN_APROVED = 0x0;
+	public static final int TOKEN_APROVED = 0x1;
 
-	public static final int TOKEN_ILLEGAL = 0x1;
+	public static final int TOKEN_ILLEGAL = 0x2;
 
-	public static final int PATTERN_ENDED = 0x2;
-
+	public static final int PATTERN_ENDED = 0x3;
+	
 	protected int lookup;
 
 	public static class PatternOR extends TokenPattern {
@@ -19,16 +19,17 @@ public abstract class TokenPattern implements PatternComponent {
 		}
 
 		@Override
-		public boolean recognise(Symbol symbol, int point) {
+		public int recognise(Symbol symbol, int point) {
 			lookup = -1;
 			for (int i = 0; i < components.length; i++) {
 				PatternComponent c = components[i];
-				if (c.recognise(symbol, point)) {
+				int code = c.recognise(symbol, point);
+				if (code==TOKEN_APROVED||code==PATTERN_ENDED) {
 					lookup = i;
-					return true;
+					return code;
 				}
 			}
-			return false;
+			return TOKEN_ILLEGAL;
 		}
 
 		@Override
@@ -46,7 +47,7 @@ public abstract class TokenPattern implements PatternComponent {
 		}
 
 		@Override
-		public boolean recognise(Symbol symbol, int point) {
+		public int recognise(Symbol symbol, int point) {
 			lookup = point;
 			return components[point].recognise(symbol, 0);
 		}
