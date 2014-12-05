@@ -1,0 +1,32 @@
+#
+# EBNF2 for the Core language
+# V 0.1 2014-12-05
+#
+# Some syntax clarification
+# (*) all characters except newline until the next pattern is found.
+# (**) all characters including newline until the next pattern is found.
+
+# Some basic definitions
+NUMBER := 0-9 | NUMBER(0)
+IDENTIFIER := A-Z | a-z | IDENTIFIER(1) + IDENTIFIER | NUMBER
+*NL := '\n' | *EOF
+*BREAK := *NL | ';' 
+
+
+STRING_LITTERAL := '"' + (**) + '"'
+
+
+# Comment definitions
+COMMENT_STARTER := '//'
+COMMENT := COMMENT_STARTER + (*) + *NL
+BLOCK_COMMENT_START := '/*'
+BLOCK_COMMENT_END := '*/'
+BLOCK_COMMENT := BLOCK_COMMENT_START + (**) + BLOCK_COMMENT_END
+
+*PREPROCESSING = COMMENT | BLOCK_COMMENT 
+
+# Document 
+DOCUMENT := DEFINITION + *BREAK | DOCUMENT(0) + DOCUMENT 
+
+
+
