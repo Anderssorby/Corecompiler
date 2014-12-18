@@ -1,10 +1,19 @@
 #
 # EBNF2 for the Core language
+# Extended Bachus-Nauer format with some extra features for simplification of syntax.
 # V 0.1 2014-12-05
 #
+# The system will require a check for undefined definitions.
+#
 # Some syntax clarification
-# (*) all characters except newline until the next pattern is found.
-# (**) all characters including newline until the next pattern is found.
+# - (*) all characters except newline until the next pattern is found.
+# - (**) all characters including newline until the next pattern is found.
+# - ( * ...)(DEF1, DEF2, ...) Defines all the combinations of the definitions inserted
+#   at the star positions. (Not necessarily in use)
+# - DEF(number) extend only until this index (number) of the definition.
+# - DEF(-) extend only until the definition before this one. 
+#
+#
 
 # Some basic definitions
 NUMBER := 0-9 | NUMBER(0)
@@ -15,6 +24,7 @@ IDENTIFIER := A-Z | a-z | IDENTIFIER(1) + IDENTIFIER | NUMBER
 
 STRING_LITTERAL := '"' + (**) + '"'
 
+##############
 
 # Comment definitions
 COMMENT_STARTER := '//'
@@ -23,9 +33,49 @@ BLOCK_COMMENT_START := '/*'
 BLOCK_COMMENT_END := '*/'
 BLOCK_COMMENT := BLOCK_COMMENT_START + (**) + BLOCK_COMMENT_END
 
+# This describes the content to be removed before the actual 
+# parsing process can begin.
 *PREPROCESSING = COMMENT | BLOCK_COMMENT 
 
-# Document 
+############### 
+
+# The main syntax structures of Core
+
+# The expression
+ARITHMETIC_OPERATOR := '+' | '-' | '/' | '*'
+
+ARITHMETIC_EXPRESSION := NUMBER | IDENTIFIER | 
+(* + ARITHMETIC_OPERATOR + *)(NUMBER, IDENTIFIER, EXPRESSION) | 
+ '(' + ARITHMETIC_EXPRESSION + ')' | '-' + ARITHMETIC_EXPRESSION 
+
+
+STRING_EXPRESSION := STRING_LITTERAL | STRING_LITTERAL + '+' + STRING_EXPRESSION | STRING_LITTERAL + '+' + ARITHMETIC_EXPRESSION 
+
+EXPRESSION := ARITHMETIC_EXPRESSION | STRING_EXPRESSION 
+
+############### 
+
+# Simple definitions
+INNER_DEFINITION := IDENTIFIER | DEFINITION
+DEFINITION := IDENTIFIER + '[' + INNER_DEFINITION + ']' 
+
+# List definitions
+LIST := INNER_DEFINITION | INNER_DEFINITION + ',' + INNER_DEFINITION | INNER_DEFINITION + ',' 
+DEFINITION := IDENTIFIER + '(' + ')' | IDENTIFIER + '(' + LIST + ')' | IDENTIFIER + '{' + LIST + '}'
+INNER_DEFINITION := '(' + LIST + ')' | '{' + LIST + '}'
+
+# Core special syntax
+
+# The structure access
+DEFINITION := DEFINITION(-) + '.' + DEFINITION 
+
+# The constrain chain
+DEFINITION := DEFINITION(-) + '#' + DEFINITION 
+
+############### 
+
+# Document, the main definition used in this parsing. All other 
+# definitions extend from this.
 DOCUMENT := DEFINITION + *BREAK | DOCUMENT(0) + DOCUMENT 
 
 
