@@ -5,15 +5,17 @@ import java.util.Vector;
 
 public class Compiler {
 
-		
+	private Format format;
 	private Vector<CompilationUnit> units = new Vector<CompilationUnit>();
 	
-	public Compiler() {
-		
+	public Compiler(Format format) {
+		this.format = format;
 	}
 
-	public static void main(String[] args) {
-		Compiler c = new Compiler();
+	public static void main(String[] args) throws Exception {
+		Format format = Format.parseFormatFile(new File("EBNF.txt"));
+		Compiler c = new Compiler(format);
+		format.printDefinitons();
 		File file = new File(args[0]);
 		c.createCompilationUnit(file);
 	}
@@ -32,6 +34,10 @@ public class Compiler {
 				return unit;
 		}
 		return null;
+	}
+
+	public static boolean verbose() {
+		return true;
 	}
 
 }

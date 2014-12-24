@@ -1,21 +1,21 @@
-
-Class#*MainClass{
- 
- *name["Hello I'm Anders"],
- *you[1],
- 
- var#[12 + 0 - you],
- 
- Function # *sort ( List#array, Loop#system, rule)#{
- 
-  for[system(array)](
-  (n, m),
-   rule(n, m)#{
-    var[ array( n ) ],
-    array(n)[ array(m) ],
-    array(m)[ var ]
-   }
-  )
-  
- }
-}
+
+Class#*MainClass{
+ 
+ *name["Hello I'm Anders"],
+ *you[1],
+ 
+ var#[12 + 0 - you],
+ 
+ Function # *sort ( List#array, Loop#system, rule)#{
+ 
+  for[system(array)] (
+  (n, m),
+   rule(n, m) {
+    var[ array( n ) ],
+    array(n)[ array(m) ],
+    array(m)[ var ]
+   }
+  )
+  
+ }
+}

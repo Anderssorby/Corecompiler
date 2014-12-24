@@ -9,7 +9,7 @@
 # - (*) all characters except newline until the next pattern is found.
 # - (**) all characters including newline until the next pattern is found.
 # - ( * ...)(DEF1, DEF2, ...) Defines all the combinations of the definitions inserted
-#   at the star positions. (Not necessarily in use)
+#   at the star positions. 
 # - DEF(number) extend only until this index (number) of the definition.
 # - DEF(-) extend only until the definition before this one. 
 #
@@ -17,6 +17,9 @@
 
 # Some basic definitions
 NUMBER := 0-9 | NUMBER(0)
+FLOATING := NUMBER + '.' + NUMBER
+# Some special number formats needs to be added
+EXTENDED_NUMBER := NUMBER | FLOATING
 IDENTIFIER := A-Z | a-z | IDENTIFIER(1) + IDENTIFIER | NUMBER
 *NL := '\n' | *EOF
 *BREAK := *NL | ';' 
@@ -35,7 +38,7 @@ BLOCK_COMMENT := BLOCK_COMMENT_START + (**) + BLOCK_COMMENT_END
 
 # This describes the content to be removed before the actual 
 # parsing process can begin.
-*PREPROCESSING = COMMENT | BLOCK_COMMENT 
+*PREPROCESSING := COMMENT | BLOCK_COMMENT 
 
 ############### 
 
