@@ -7,7 +7,7 @@ public class SyntaxError extends RuntimeException {
 	}
 
 	public SyntaxError(Symbol symbol, CompilationUnit unit) {
-		super("Unexpected " + symbol.getToken().name() + " ("
+		super("Unexpected " + symbol.getToken().toString() + " ("
 				+ unit.getFileName() + ":" + symbol.line() + ")");
 	}
 }

@@ -25,12 +25,12 @@ public class DefinitionFactory implements ConstructFactory<Definition> {
 
 	@Override
 	public boolean addToAssembly(Symbol symbol) {
-		switch (symbol.getToken()) {
-		case NAME:
+		switch (symbol.getToken().toString()) {
+		case "NAME":
 			product = new Definition(ConstrainType.NAMED);
 			ended = true;
 			return true;
-		case SQUARE_BRACES_LEFT: {
+		case "SQUARE_BRACES_LEFT": {
 			// Scope current = scopes.lastElement();
 			product = new Definition(ConstrainType.EXPRESSIVE);
 
@@ -46,7 +46,7 @@ public class DefinitionFactory implements ConstructFactory<Definition> {
 			// removeTail(last, definition);
 			return true;
 		}
-		case SQUARE_BRACES_RIGHT: {
+		case "SQUARE_BRACES_RIGHT": {
 
 			// TODO fix for recursion
 			ended = true;
@@ -139,7 +139,7 @@ public class DefinitionFactory implements ConstructFactory<Definition> {
 			removeTail(last, list);
 			return true;
 	//	}*/
-		case META_CONSTRAINT: {
+		case "META_CONSTRAINT": {
 			product = new MetaConstraint(symbol.getValue());
 			return true;
 		}

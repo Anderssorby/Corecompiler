@@ -15,7 +15,8 @@ public class Compiler {
 	public static void main(String[] args) throws Exception {
 		Format format = Format.parseFormatFile(new File("EBNF.txt"));
 		Compiler c = new Compiler(format);
-		format.printDefinitons();
+		if (verbose())
+			format.printDefinitons();
 		File file = new File(args[0]);
 		c.createCompilationUnit(file);
 	}
@@ -38,6 +39,10 @@ public class Compiler {
 
 	public static boolean verbose() {
 		return true;
+	}
+
+	public Format getFormat() {
+		return format;
 	}
 
 }

@@ -22,63 +22,63 @@ public class ExpressionFactory implements ConstructFactory<Expression> {
 
 	@Override
 	public boolean addToAssembly(Symbol symbol) {
-		switch (symbol.getToken()) {
-		case STRING_LITTERAL: {
+		switch (symbol.getToken().toString()) {
+		case "STRING_LITTERAL": {
 			loadExpression();
 			expression.string(symbol.getValue());
 //			return expression;
 			return true;
 		}
-		case NAME: {
+		case "NAME": {
 			loadExpression();
 //			expression.constraint(definitionReader.read(symbol, lexer));
 //			return expression;
 			return true;
 		}
-		case NUMBER: {
+		case "NUMBER": {
 			loadExpression();
 			Integer inte = Integer.parseInt(symbol.getValue());
 			expression.integer(inte);
 //			return expression;
 			return true;
 		}
-		case PLUS: {
+		case "PLUS": {
 			loadExpression();
 			expression.plus();
 //			return expression;
 			return true;
 		}
-		case MINUS: {
+		case "MINUS": {
 			loadExpression();
 			expression.minus();
 //			return expression;
 			return true;
 		}
-		case MULTIPLY: {
+		case "MULTIPLY": {
 			loadExpression();
 			expression.multiply();
 //			return expression;
 			return true;
 		}
-		case DIVIDE: {
+		case "DIVIDE": {
 			loadExpression();
 			expression.divide();
 //			return expression;
 			return true;
 		}
-		case PERCENT: {
+		case "PERCENT": {
 			loadExpression();
 			expression.modulo();
 //			return expression;
 			return true;
 		}
-		case PARENTHESIS_LEFT: {
+		case "PARENTHESIS_LEFT": {
 			loadExpression();
 			expression.startParenthesis();
 //			return expression;
 			return true;
 		}
-		case PARENTHESIS_RIGHT: {
+		case "PARENTHESIS_RIGHT": {
 			loadExpression();
 			expression.endParenthesis();
 //			return expression;

@@ -5,35 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import com.softeno.java.compiler.factories.ConstructFactory;
-import com.softeno.java.compiler.factories.DefinitionFactory;
-import com.softeno.java.compiler.factories.ExpressionFactory;
-import com.softeno.java.compiler.factories.FormFactory;
-import com.softeno.java.compiler.factories.ListFactory;
 import com.softeno.java.constructs.Construct;
 
 public class LanguagePattern extends TokenPattern {
-
-	/**
-	 * 
-	 * @author Anders
-	 * 
-	 */
-	public static class PatternReference implements PatternComponent {
-		private String reference;
-
-		private PatternReference(String reference) {
-			this.reference = reference;
-		}
-
-		public LanguagePattern getReference() {
-			return LanguagePattern.get(reference);
-		}
-
-		@Override
-		public int recognise(Symbol token, int point) {
-			return getReference().recognise(token, point);
-		}
-	}
 
 	private static HashMap<String, LanguagePattern> values;
 
@@ -43,7 +17,7 @@ public class LanguagePattern extends TokenPattern {
 	static {
 		values = new HashMap<String, LanguagePattern>();
 
-		values.put("NAMED", new LanguagePattern(DefinitionFactory.class,
+		/*values.put("NAMED", new LanguagePattern(DefinitionFactory.class,
 				Token.NAME));
 
 		values.put("EXPRESSION", new LanguagePattern(ExpressionFactory.class,
@@ -81,7 +55,7 @@ public class LanguagePattern extends TokenPattern {
 				"STANDARD_LIST",
 				new LanguagePattern(ListFactory.class, TokenPattern.or(
 						ref("CONSTRAINT"), TokenPattern.and(ref("CONSTRAINT"),
-								Token.COMMA, ref("STANDARD_LIST")))));
+								Token.COMMA, ref("STANDARD_LIST")))));*/
 
 	}
 

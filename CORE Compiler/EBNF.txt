@@ -8,6 +8,7 @@
 # Some syntax clarification
 # - (*) all characters except newline until the next pattern is found.
 # - (**) all characters including newline until the next pattern is found.
+#   Including escape sequences like \', \" and \\.
 # - ( * ...)(DEF1, DEF2, ...) Defines all the combinations of the definitions inserted
 #   at the star positions. 
 # - DEF(number) extend only until this index (number) of the definition.
@@ -30,10 +31,10 @@ STRING_LITTERAL := '"' + (**) + '"'
 ##############
 
 # Comment definitions
-COMMENT_STARTER := '//'
+*COMMENT_STARTER := '//'
 COMMENT := COMMENT_STARTER + (*) + *NL
-BLOCK_COMMENT_START := '/*'
-BLOCK_COMMENT_END := '*/'
+*BLOCK_COMMENT_START := '/*'
+*BLOCK_COMMENT_END := '*/'
 BLOCK_COMMENT := BLOCK_COMMENT_START + (**) + BLOCK_COMMENT_END
 
 # This describes the content to be removed before the actual 

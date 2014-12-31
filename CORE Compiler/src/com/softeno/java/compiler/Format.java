@@ -7,10 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import com.softeno.java.compiler.Token.ConstantToken;
+
 public class Format {
 	
-	private Map<String, Vector<Vector<String>>> definitions = new HashMap<String, Vector<Vector<String>>>();
-
+	public static final String PREPROCESSING = "*PREPROCESSING";
+	private Map<String, Vector<Vector<PatternComponent>>> definitions = new HashMap<String, Vector<Vector<PatternComponent>>>();
+	private Vector<Token> tokens = new Vector<Token>();
+	
 	private Format() {
 
 	}
@@ -18,13 +22,12 @@ public class Format {
 	public static Format parseFormatFile(File file) throws IOException {
 		FileReader fr = new FileReader(file);
 		char[] buff = new char[(int) file.length()];
-		System.out.println("Reading format file...");
+		if (Compiler.verbose())
+			System.out.println("Reading format file...");
 		fr.read(buff);
 		fr.close();
 		String contents = new String(buff);
 		contents = preprocess(contents);
-		if (Compiler.verbose())
-			System.out.println(contents);
 		
 		Format format = new Format();
 		// Splitting into separate lines
@@ -101,16 +104,50 @@ public class Format {
 			}
 		}
 
+		format.optimizeTokens();
 		return format;
 
 	}
 
 	private void addDefinition(String name, Vector<String> partproc) {
 		if (!definitions.containsKey(name)) {
-			definitions.put(name, new Vector<Vector<String>>());
+			definitions.put(name, new Vector<Vector<PatternComponent>>());
 		}
-		definitions.get(name).add(partproc);
+		Vector<PatternComponent> components = new Vector<PatternComponent>(partproc.size());
+		Vector<Token> newTokens = new Vector<Token>();
+		for (int i = 0; i < partproc.size(); i++) {
+			String part = partproc.get(i);
+			if (part.startsWith("\'")) {
+				Token token = new Token(part.substring(1, part.length()-1));
+				if (!name.startsWith("*"))
+					newTokens.add(token);
+				components.add(token);
+			} else if (part.equals("(*)")) {
+				// TODO This should be as described in the format file
+				components.add(ConstantToken.STRING_LITTERAL);
+			} else if (part.equals("(**)")) {
+				components.add(ConstantToken.STRING_LITTERAL);
+			} else {
+				PatternReference reference = new PatternReference(part);
+				components.add(reference);
+			}
+		}
+		tokens.addAll(newTokens);
+		definitions.get(name).add(components);
 		
+	}
+	
+	private void optimizeTokens() {
+		Vector<Token> optimal = new Vector<Token>();
+		optim : for (Token token: tokens) {
+			if (!optimal.isEmpty())
+			for (Token t:optimal) {
+				if (token.equals(t))
+					continue optim;
+			}
+			optimal.add(token);
+		}
+		tokens = optimal;
 	}
 
 	private static String[] split(String str, String splitter) {
@@ -184,11 +221,21 @@ public class Format {
 	public void printDefinitons() {
 		for (String key:definitions.keySet()) {
 			System.out.println(key+":");
-			for (Vector<String> list:definitions.get(key)) {
+			for (Vector<PatternComponent> list:definitions.get(key)) {
 				for (int i = 0; i < list.size(); i++) {
 					System.out.println("\t"+list.get(i));
 				}
 			}
 		}
+	}
+	
+	public Token[] getTokens() {
+		Token[] t = new Token[tokens.size()];
+		t = tokens.toArray(t); 
+		return t;
+	}
+
+	public Vector<Vector<PatternComponent>> getPreprocess() {
+		return definitions.get(PREPROCESSING);
 	}
 }

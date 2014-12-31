@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
+import java.util.regex.MatchResult;
 
 import com.softeno.java.constructs.Construct;
 
@@ -14,21 +15,66 @@ public class CompilationUnit {
 	private File file;
 	private String name;
 	private String text;
+	private boolean preprocessed;
 
 	public CompilationUnit(Compiler compiler, File file) {
 		this.compiler = compiler;
 		this.file = file;
 		this.name = file.getName().replaceFirst("\\.[A-Za-z]+$", "");
-		lexer = new Lexer(Token.values());
+		lexer = new Lexer(compiler.getFormat().getTokens());
+	}
+	
+	public void preprocess() {
+		Vector<Vector<PatternComponent>> preprocess = compiler.getFormat().getPreprocess();
+		StringBuffer readyText = new StringBuffer(text.length());
+		int pos = 0;
+		while (pos < text.length()) {
+			int 
+			end = 0, 
+			length = 0,
+			start = 0;
+			
+			patternSearch: for (Vector<PatternComponent> pattern : preprocess) {
+				int patlen = 0;
+				for (int i = 0; i < pattern.size(); i++) {
+					PatternComponent component = pattern.get(i);
+					if (component instanceof Token) {
+						Token token = (Token) component;
+						MatchResult result = token.match(text.substring(pos));
+						if (result != null) {
+							if (i == 0) {
+								end = pos;
+								patlen += result.group().length();
+							}
+						} else {
+							continue patternSearch;
+						}
+
+					}
+				}
+				if (patlen > length) {
+					length = patlen;
+				}
+			}
+			if (end >= start) {
+				readyText.append(text.substring(start, end));
+				pos = end + length;
+				start = pos;
+			}
+		}
+		text = readyText.toString();
+		preprocessed = true;
 	}
 
 	public void parse() {
-		System.out.println("Scanning...");
+		if (Compiler.verbose())
+			System.out.println("Scanning...");
 		lexer.scann(text);
-		while (lexer.hasNext())
-			System.out.println(lexer.nextToken().getToken().name() + ", ");
+		if (Compiler.verbose()) while (lexer.hasNext())
+			System.out.println(lexer.nextToken().getToken() + ", ");
 		lexer.reset();
-		System.out.println("Parsing...");
+		if (Compiler.verbose())
+			System.out.println("Parsing...");
 		Vector<Construct> top = new Vector<Construct>();
 		try {
 			while (lexer.hasNext()) {
@@ -313,7 +359,8 @@ public class CompilationUnit {
 		try {
 			FileReader fr = new FileReader(file);
 			char[] buff = new char[(int) file.length()];
-			System.out.println("Reading file...");
+			if (Compiler.verbose())
+				System.out.println("Reading file...");
 			fr.read(buff);
 			fr.close();
 			text = new String(buff);
@@ -326,4 +373,9 @@ public class CompilationUnit {
 	public Lexer getLexer() {
 		return null;
 	}
+
+	public boolean isPreprocessed() {
+		return preprocessed;
+	}
+
 }

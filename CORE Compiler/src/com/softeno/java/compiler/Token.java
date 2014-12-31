@@ -7,12 +7,90 @@ import java.util.regex.Pattern;
 import static com.softeno.java.compiler.TokenPattern.TOKEN_APROVED;
 import static com.softeno.java.compiler.TokenPattern.TOKEN_ILLEGAL;
 
-public enum Token implements PatternComponent {
-	NAME("[_a-z$][_a-z0-9$]*", true), CONSTRAIN("#"), CURLY_BRACES_LEFT("{"), CURLY_BRACES_RIGHT(
+public class Token implements PatternComponent {
+	
+	private Pattern pattern;
+	private String value;
+	private MatchingEngine engine;
+
+	Token(String regex, boolean isRegex) {
+		if (isRegex) {
+			this.pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE
+					| Pattern.DOTALL);
+		} else {
+			this.value = regex;
+			this.pattern = Pattern.compile(Pattern.quote(regex),
+					Pattern.CASE_INSENSITIVE);
+		}
+		this.engine = new DefaultMatcher(pattern);
+	}
+
+	Token(String regex) {
+		this(regex, false);
+	}
+
+	Token(MatchingEngine m) {
+		this.engine = m;
+	}
+
+	interface MatchingEngine {
+		public MatchResult match(String input);
+
+		public int getMinimalLength();
+	}
+
+	@Override
+	public String toString() {
+		return value;
+	}
+
+	public MatchResult match(String input) {
+		return engine.match(input);
+	}
+
+	public Pattern getPattern() {
+		return pattern;
+	}
+
+	@Override
+	public int recognise(Symbol symbol, int i) {
+		return this.equals(symbol) ? TOKEN_APROVED : TOKEN_ILLEGAL;
+	}
+	
+	public boolean equals(Token token) {
+		return value.equals(token.value);
+	}
+	
+	public static class DefaultMatcher implements MatchingEngine {
+
+		private Pattern pattern;
+		private int minimalLength;
+		private DefaultMatcher(Pattern pattern) {
+			this.pattern = pattern;
+			this.minimalLength = pattern.pattern().length();
+		}
+
+		@Override
+		public MatchResult match(String input) {
+			Matcher matcher = pattern.matcher(input);
+			if (matcher.lookingAt()) {
+				return matcher.toMatchResult();
+			} else {
+				return null;
+			}
+		}
+
+		@Override
+		public int getMinimalLength() {
+			return minimalLength;
+		}
+	}
+	
+	public enum ConstantToken implements PatternComponent { /* NAME("[_a-z$][_a-z0-9$]*", true), CONSTRAIN("#"), CURLY_BRACES_LEFT("{"), CURLY_BRACES_RIGHT(
 			"}"), PARENTHESIS_LEFT("("), PARENTHESIS_RIGHT(")"), SQUARE_BRACES_LEFT(
 			"["), SQUARE_BRACES_RIGHT("]"), DOT("."), PLUS("+"), MINUS("-"), COMMA(
 			","), NUMBER("[0-9]+(\\.[0-9]+)?", true), MULTIPLY("*"), DIVIDE("/"), PERCENT(
-			"%"), META_CONSTRAINT("@[_a-z$][_a-z0-9$]*", true),
+			"%"), META_CONSTRAINT("@[_a-z$][_a-z0-9$]*", true),*/
 
 	STRING_LITTERAL(new MatchingEngine() {
 
@@ -106,73 +184,39 @@ public enum Token implements PatternComponent {
 	 * Boolean operators
 	 */
 
-	GRATER_THAN(">"), LESS_THAN("<"), BOOLEAN_AND("&&"), BOOLEAN_OR("||"), NOT(
-			"!")
+	/*GRATER_THAN(">"), LESS_THAN("<"), BOOLEAN_AND("&&"), BOOLEAN_OR("||"), NOT(
+			"!")*/
 
 	;
-
 	private Pattern pattern;
 	private MatchingEngine engine;
-	private int minimalLength;
-
-	Token(String regex, boolean isRegex) {
-		this.engine = new DefaultMatcher();
+	
+	ConstantToken(String regex, boolean isRegex) {
 		if (isRegex) {
 			this.pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE
 					| Pattern.DOTALL);
 		} else {
 			this.pattern = Pattern.compile(Pattern.quote(regex),
 					Pattern.CASE_INSENSITIVE);
-			this.minimalLength = regex.length();
 		}
+		this.engine = new DefaultMatcher(pattern);
 	}
 
-	Token(String regex) {
+	ConstantToken(String regex) {
 		this(regex, false);
 	}
 
-	Token(MatchingEngine m) {
+	ConstantToken(MatchingEngine m) {
 		this.engine = m;
 	}
-
-	interface MatchingEngine {
-		public MatchResult match(String input);
-
-		public int getMinimalLength();
-	}
-
-	public class DefaultMatcher implements MatchingEngine {
-
-		private DefaultMatcher() {
-
-		}
-
-		@Override
-		public MatchResult match(String input) {
-			Matcher matcher = pattern.matcher(input);
-			if (matcher.lookingAt()) {
-				return matcher.toMatchResult();
-			} else {
-				return null;
-			}
-		}
-
-		@Override
-		public int getMinimalLength() {
-			return minimalLength;
-		}
-	}
-
+	
 	public MatchResult match(String input) {
 		return engine.match(input);
-	}
-
-	public Pattern getPattern() {
-		return pattern;
 	}
 
 	@Override
 	public int recognise(Symbol symbol, int i) {
 		return this.equals(symbol) ? TOKEN_APROVED : TOKEN_ILLEGAL;
+	}
 	}
 }
