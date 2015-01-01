@@ -24,6 +24,7 @@ public class Compiler {
 	public CompilationUnit createCompilationUnit(File file) {
 		CompilationUnit unit = new CompilationUnit(this, file);
 		unit.loadFile();
+		unit.preprocess();
 		unit.parse();
 		units.add(unit);
 		return unit;

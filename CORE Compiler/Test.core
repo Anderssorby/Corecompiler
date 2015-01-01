@@ -1,11 +1,11 @@
-
+// This is a single line comment/** * This is a multi-line block comment. *  *//** * This is a test class  * * */
 Class#*MainClass{
  
  *name["Hello I'm Anders"],
  *you[1],
- 
- var#[12 + 0 - you],
- 
+ // In Core there are no variables only evaluatives.// This represents an expression.
+ var # [12 + 0 - you],
+ // This is an implementation of a sorting algorithm.
  Function # *sort ( List#array, Loop#system, rule)#{
  
   for[system(array)] (

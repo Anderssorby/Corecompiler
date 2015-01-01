@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
-import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.softeno.java.constructs.Construct;
 
@@ -15,7 +16,7 @@ public class CompilationUnit {
 	private File file;
 	private String name;
 	private String text;
-	private boolean preprocessed;
+	private boolean preprocessed = false;
 
 	public CompilationUnit(Compiler compiler, File file) {
 		this.compiler = compiler;
@@ -25,45 +26,42 @@ public class CompilationUnit {
 	}
 	
 	public void preprocess() {
-		Vector<Vector<PatternComponent>> preprocess = compiler.getFormat().getPreprocess();
 		StringBuffer readyText = new StringBuffer(text.length());
-		int pos = 0;
-		while (pos < text.length()) {
-			int 
-			end = 0, 
-			length = 0,
-			start = 0;
-			
-			patternSearch: for (Vector<PatternComponent> pattern : preprocess) {
-				int patlen = 0;
-				for (int i = 0; i < pattern.size(); i++) {
-					PatternComponent component = pattern.get(i);
-					if (component instanceof Token) {
-						Token token = (Token) component;
-						MatchResult result = token.match(text.substring(pos));
-						if (result != null) {
-							if (i == 0) {
-								end = pos;
-								patlen += result.group().length();
-							}
-						} else {
-							continue patternSearch;
-						}
-
-					}
-				}
-				if (patlen > length) {
-					length = patlen;
+		Pattern startBlock = Pattern.compile("/\\*");
+		int start = 0;
+		Matcher matcher = startBlock.matcher(text);
+		// Remove block comments
+		while (matcher.find(start)) {
+			for (int i = matcher.end(); i < text.length()-1; i++) {
+				if (text.charAt(i) == '*' && text.charAt(i+1) == '/') {
+					readyText.append(text.substring(start, matcher.start()));
+					start = i+2;
+					break;
 				}
 			}
-			if (end >= start) {
-				readyText.append(text.substring(start, end));
-				pos = end + length;
-				start = pos;
+		} 
+		readyText.append(text.substring(start, text.length()));
+		text = readyText.toString();
+		
+		// Remove line comments
+		readyText = new StringBuffer(text.length());
+		Pattern line = Pattern.compile("//");
+		start = 0;
+		matcher = line.matcher(text);
+		while (matcher.find(start)) {
+			for (int i = matcher.end(); i < text.length()-1; i++) {
+				if (text.charAt(i) == '\n' || text.charAt(i) == '\r') {
+					readyText.append(text.substring(start, matcher.start()));
+					start = i+1;
+					break;
+				}
 			}
 		}
+		readyText.append(text.substring(start, text.length()));
 		text = readyText.toString();
+		
 		preprocessed = true;
+		System.out.println(text);
 	}
 
 	public void parse() {
