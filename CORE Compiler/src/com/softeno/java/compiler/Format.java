@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import com.softeno.java.compiler.Token.ConstantToken;
+import com.softeno.java.compiler.Token.SpecialToken;
 
 public class Format {
 	
@@ -124,10 +124,13 @@ public class Format {
 				components.add(token);
 			} else if (part.equals("(*)")) {
 				// TODO This should be as described in the format file
-				components.add(ConstantToken.STRING_LITTERAL);
+				components.add(SpecialToken.STRING_LITTERAL);
 			} else if (part.equals("(**)")) {
-				components.add(ConstantToken.STRING_LITTERAL);
+				components.add(SpecialToken.STRING_LITTERAL);
+			} else if (part.equals("a-z")) {
+				
 			} else {
+				// TODO reference limitations must be implemented
 				PatternReference reference = new PatternReference(part);
 				components.add(reference);
 			}

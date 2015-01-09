@@ -68,11 +68,17 @@ public class CompilationUnit {
 		if (Compiler.verbose())
 			System.out.println("Scanning...");
 		lexer.scann(text);
-		if (Compiler.verbose()) while (lexer.hasNext())
-			System.out.println(lexer.nextToken().getToken() + ", ");
-		lexer.reset();
+		if (Compiler.verbose()) {
+			while (lexer.hasNext())
+				System.out.println(lexer.nextToken().getToken() + ", ");
+			lexer.reset();
+		}
 		if (Compiler.verbose())
 			System.out.println("Parsing...");
+		
+		
+		
+		/*
 		Vector<Construct> top = new Vector<Construct>();
 		try {
 			while (lexer.hasNext()) {
@@ -83,6 +89,7 @@ public class CompilationUnit {
 			e.printStackTrace();
 		}
 		System.out.println(top);
+		*/
 	}
 
 	public Construct readNext() throws SyntaxError {

@@ -86,7 +86,7 @@ public class Token implements PatternComponent {
 		}
 	}
 	
-	public enum ConstantToken implements PatternComponent { /* NAME("[_a-z$][_a-z0-9$]*", true), CONSTRAIN("#"), CURLY_BRACES_LEFT("{"), CURLY_BRACES_RIGHT(
+	public enum SpecialToken implements PatternComponent { /* NAME("[_a-z$][_a-z0-9$]*", true), CONSTRAIN("#"), CURLY_BRACES_LEFT("{"), CURLY_BRACES_RIGHT(
 			"}"), PARENTHESIS_LEFT("("), PARENTHESIS_RIGHT(")"), SQUARE_BRACES_LEFT(
 			"["), SQUARE_BRACES_RIGHT("]"), DOT("."), PLUS("+"), MINUS("-"), COMMA(
 			","), NUMBER("[0-9]+(\\.[0-9]+)?", true), MULTIPLY("*"), DIVIDE("/"), PERCENT(
@@ -191,7 +191,7 @@ public class Token implements PatternComponent {
 	private Pattern pattern;
 	private MatchingEngine engine;
 	
-	ConstantToken(String regex, boolean isRegex) {
+	SpecialToken(String regex, boolean isRegex) {
 		if (isRegex) {
 			this.pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE
 					| Pattern.DOTALL);
@@ -202,11 +202,11 @@ public class Token implements PatternComponent {
 		this.engine = new DefaultMatcher(pattern);
 	}
 
-	ConstantToken(String regex) {
+	SpecialToken(String regex) {
 		this(regex, false);
 	}
 
-	ConstantToken(MatchingEngine m) {
+	SpecialToken(MatchingEngine m) {
 		this.engine = m;
 	}
 	

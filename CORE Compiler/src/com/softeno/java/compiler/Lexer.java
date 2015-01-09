@@ -48,6 +48,8 @@ public class Lexer {
 					continue;
 				}
 			}
+			if (mlen == 0)
+				throw new SyntaxError("Unexpected character:"+text.charAt(pos)+" at line "+line);
 			pos += mlen;
 			table.add(symbol);
 		}
