@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.softeno.java.compiler.Token.SpecialToken;
 
@@ -90,7 +92,7 @@ public class Format {
 						}
 						// Register the definitions
 						for (Vector<String> com:combinations) {
-							format.addDefinition(name, com);
+							format.addDefinition(name, com, j);
 						}
 						// We don't allow any more parts before and after this part since it's
 						// already covered inside the functionality.
@@ -100,7 +102,7 @@ public class Format {
 					}
 				}
 				if (!multiple)
-					format.addDefinition(name, partproc);
+					format.addDefinition(name, partproc, j);
 			}
 		}
 
@@ -109,14 +111,17 @@ public class Format {
 
 	}
 
-	private void addDefinition(String name, Vector<String> partproc) {
+	private void addDefinition(String name, Vector<String> partproc, int depth) {
 		if (!definitions.containsKey(name)) {
 			definitions.put(name, new Vector<Vector<PatternComponent>>());
 		}
+		Pattern charcterRange = Pattern.compile("([a-zA-Z])-([a-zA-Z])");
+		
 		Vector<PatternComponent> components = new Vector<PatternComponent>(partproc.size());
 		Vector<Token> newTokens = new Vector<Token>();
 		for (int i = 0; i < partproc.size(); i++) {
 			String part = partproc.get(i);
+			Matcher matcher = charcterRange.matcher(part);
 			if (part.startsWith("\'")) {
 				Token token = new Token(part.substring(1, part.length()-1));
 				if (!name.startsWith("*"))
@@ -127,11 +132,14 @@ public class Format {
 				components.add(SpecialToken.STRING_LITTERAL);
 			} else if (part.equals("(**)")) {
 				components.add(SpecialToken.STRING_LITTERAL);
-			} else if (part.equals("a-z")) {
 				
+			} else if (matcher.find()) {
+				String start = matcher.group(1);
+				String end = matcher.group(2);
+				components.add(new CharacterRange(start, end));
 			} else {
 				// TODO reference limitations must be implemented
-				PatternReference reference = new PatternReference(part);
+				PatternReference reference = new PatternReference(part, depth);
 				components.add(reference);
 			}
 		}
