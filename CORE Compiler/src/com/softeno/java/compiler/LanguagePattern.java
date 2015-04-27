@@ -134,7 +134,7 @@ public class LanguagePattern extends TokenPattern {
 	}
 
 	public static PatternReference ref(String string) {
-		return new PatternReference(string);
+		return new PatternReference(string, 0);
 	}
 
 	@Override
